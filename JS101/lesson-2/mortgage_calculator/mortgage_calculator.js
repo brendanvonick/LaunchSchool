@@ -23,7 +23,6 @@ while (true) {
     loanAmount = readline.question();
   }
 
-
   prompt('What is the annual percentage rate, as a percent greater than 0.');
   let apr = readline.question();
 
@@ -32,19 +31,18 @@ while (true) {
     apr = readline.question();
   }
 
-
   prompt('Please enter the loan duration, in years.');
   let loanDurationYears = readline.question();
 
   while (invalidNumber(loanDurationYears)) {
-    prompt('Please enter a positive number as the loan duration in years.');
+    prompt('Please enter a positive number for the loan duration in years.');
     loanDurationYears = readline.question();
   }
 
-  let loanDurationMonths = loanDurationYears * 12;
+  let loanDurationMonths = Number(loanDurationYears) * 12;
   let monthlyRate = (Number(apr) / 100) / 12;
 
-  let monthlyPayment = loanAmount *
+  let monthlyPayment = Number(loanAmount) *
       (monthlyRate / (1 - Math.pow((1 + monthlyRate), (-loanDurationMonths))));
 
   console.log(`Your monthly payment is $${monthlyPayment.toFixed(2)}`);
