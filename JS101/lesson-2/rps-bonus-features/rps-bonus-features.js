@@ -55,7 +55,7 @@ function displayWinner(choice, computerChoice) {
 }
 
 function noOneWins() {
-  return (playerWins < 5) && (computerWins < 5);
+  return (playerWins < WINNING_SCORE) && (computerWins < WINNING_SCORE);
 }
 
 prompt('Welcome to Rock, Paper, Scissors, Lizard, Spock');
