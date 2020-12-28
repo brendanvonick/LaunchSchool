@@ -68,8 +68,7 @@ function playerChoosesSquare(board) {
 function computerChoosesSquare(board) {
   let square;
 
-
-  for (let index = 0; index < WINNING_LINES.length; index ++) {
+  for (let index = 0; index < WINNING_LINES.length; index++) {
     let line = WINNING_LINES[index];
     square = findAtRiskSquare(line, board, COMPUTER_MARKER);
     if (square) break;
@@ -100,10 +99,6 @@ function boardFull(board) {
 }
 
 function someoneWon(board) {
-  return false;
-}
-
-function someoneWon(board) {
   return !!detectWinner(board);
 }
 
@@ -113,20 +108,17 @@ function detectWinner(board) {
     let [ sq1, sq2, sq3 ] = WINNING_LINES[line];
 
     if (
-        board[sq1] === HUMAN_MARKER &&
-        board[sq2] === HUMAN_MARKER &&
-        board[sq3] === HUMAN_MARKER
+      board[sq1] === HUMAN_MARKER &&
+      board[sq2] === HUMAN_MARKER &&
+      board[sq3] === HUMAN_MARKER
     ) {
       return 'Player';
-      playerWins += 1;
-      return `Player: ${playerWins}, Computer: ${computerWins}`
     } else if (
-        board[sq1] === COMPUTER_MARKER &&
-        board[sq2] === COMPUTER_MARKER &&
-        board[sq3] === COMPUTER_MARKER
+      board[sq1] === COMPUTER_MARKER &&
+      board[sq2] === COMPUTER_MARKER &&
+      board[sq3] === COMPUTER_MARKER
     ) {
       return 'Computer';
-      computerWins += 1;
     }
   }
 
@@ -182,10 +174,6 @@ while (true) {
   let playerWins = 0;
   let computerWins = 0;
 
-  function noWinner() {
-    return (playerWins < WINNING_SCORE) && (computerWins < WINNING_SCORE);
-  }
-
   displayBoard(board, playerWins, computerWins);
 
   let currentPlayer;
@@ -207,7 +195,7 @@ while (true) {
     currentPlayer = whoGoesFirst;
   }
 
-  while (noWinner()) {
+  while ((playerWins < WINNING_SCORE) && (computerWins < WINNING_SCORE)) {
     let board = initializeBoard();
 
     if (whoGoesFirst === 'computer') {
@@ -218,7 +206,7 @@ while (true) {
         currentPlayer = alternatePlayer(currentPlayer);
         if (someoneWon(board) || boardFull(board)) break;
       }
-    } else if (whoGoesFirst === 'player'){
+    } else if (whoGoesFirst === 'player') {
       currentPlayer = whoGoesFirst;
       while (true) {
         displayBoard(board, playerWins, computerWins);
@@ -264,7 +252,7 @@ while (true) {
   prompt('Play again? (y or n)');
   let answer = readline.question().toLowerCase();
   while (!validResponse.includes(answer)) {
-    prompt('That is not a valid option. Play again? (y or n)')
+    prompt('That is not a valid option. Play again? (y or n)');
     answer = readline.question().toLowerCase();
   }
   if (answer !== 'y') break;
