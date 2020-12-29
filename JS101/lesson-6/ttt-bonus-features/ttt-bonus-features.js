@@ -228,9 +228,7 @@ while (true) {
     if ((playerWins < WINNING_SCORE) && (computerWins < WINNING_SCORE)) {
       prompt("Are you ready for the next round? (press enter/return to continue)");
       let nextRound = readline.question();
-      if (nextRound) {
-        continue;
-      }
+      if (nextRound) continue;
     }
   }
 
