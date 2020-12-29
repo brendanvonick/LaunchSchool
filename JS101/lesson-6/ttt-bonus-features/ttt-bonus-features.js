@@ -15,11 +15,15 @@ function prompt(msg) {
   console.log(`=> ${msg}`);
 }
 
-function displayBoard(board, playerWins, computerWins) {
+function displayBoardIntro() {
   console.clear();
 
   console.log(`You are ${HUMAN_MARKER}. Computer is ${COMPUTER_MARKER}`);
   console.log(`Reach ${WINNING_SCORE} wins first to achieve victory.`);
+}
+
+function displayBoard(board, playerWins, computerWins) {
+  displayBoardIntro();
   console.log(`Player: ${playerWins}, Computer: ${computerWins}`);
 
   console.log('');
@@ -82,9 +86,7 @@ function computerChoosesSquare(board) {
     }
   }
 
-  if (board['5'] === INITIAL_MARKER) {
-    square = '5';
-  }
+  if (board['5'] === INITIAL_MARKER) square = '5';
 
   if (!square) {
     let randomIndex = Math.floor(Math.random() * emptySquares(board).length);
@@ -103,7 +105,6 @@ function someoneWon(board) {
 }
 
 function detectWinner(board) {
-
   for (let line = 0; line < WINNING_LINES.length; line++) {
     let [ sq1, sq2, sq3 ] = WINNING_LINES[line];
 
@@ -161,11 +162,29 @@ function chooseSquare(board, currentPlayer) {
 }
 
 function alternatePlayer(currentPlayer) {
-  if (currentPlayer === 'player') {
-    return 'computer';
-  } else {
-    return 'player';
+  return (currentPlayer === 'player') ? 'computer' : 'player';
+}
+
+function playersChoices(board, playerWins, computerWins, currentPlayer) {
+  while (true) {
+    displayBoard(board, playerWins, computerWins);
+    chooseSquare(board, currentPlayer);
+    currentPlayer = alternatePlayer(currentPlayer);
+    if (someoneWon(board) || boardFull(board)) break;
   }
+}
+
+function decideWhoGoesFirst() {
+  let validPlayerChoices = ['player', 'computer'];
+  let whoGoesFirst;
+
+  prompt('Who would you like to go first? (player/computer)');
+  whoGoesFirst = readline.question().toLowerCase();
+  while (!validPlayerChoices.includes(whoGoesFirst)) {
+    prompt('That is not a valid choice for who goes first, please choose (player/computer).');
+    whoGoesFirst = readline.question().toLowerCase();
+  }
+  return whoGoesFirst;
 }
 
 let board = initializeBoard();
@@ -173,58 +192,23 @@ let board = initializeBoard();
 while (true) {
   let playerWins = 0;
   let computerWins = 0;
+  let returnVictor = '';
+  let validResponse = ['y', 'n'];
+  let currentPlayer;
 
   displayBoard(board, playerWins, computerWins);
 
-  let currentPlayer;
-  let whoGoesFirst = '';
-  let validPlayerChoices = ['player', 'computer'];
   if (CHOOSE === 'choose') {
-    prompt('Who would you like to go first? (player/computer)');
-    whoGoesFirst = readline.question();
-    while (!validPlayerChoices.includes(whoGoesFirst)) {
-      prompt('That is not a valid choice for who goes first, please choose (player/computer).');
-      whoGoesFirst = readline.question();
-    }
-    currentPlayer = whoGoesFirst;
-  } else if (CHOOSE === 'computer') {
-    whoGoesFirst = CHOOSE;
-    currentPlayer = whoGoesFirst;
+    currentPlayer = decideWhoGoesFirst();
   } else {
-    whoGoesFirst = CHOOSE;
-    currentPlayer = whoGoesFirst;
+    currentPlayer = CHOOSE;
   }
 
   while ((playerWins < WINNING_SCORE) && (computerWins < WINNING_SCORE)) {
     let board = initializeBoard();
 
-    if (whoGoesFirst === 'computer') {
-      currentPlayer = whoGoesFirst;
-      while (true) {
-        displayBoard(board, playerWins, computerWins);
-        chooseSquare(board, currentPlayer);
-        currentPlayer = alternatePlayer(currentPlayer);
-        if (someoneWon(board) || boardFull(board)) break;
-      }
-    } else if (whoGoesFirst === 'player') {
-      currentPlayer = whoGoesFirst;
-      while (true) {
-        displayBoard(board, playerWins, computerWins);
-
-        chooseSquare(board, currentPlayer);
-        currentPlayer = alternatePlayer(currentPlayer);
-        if (someoneWon(board) || boardFull(board)) break;
-
-        chooseSquare(board, currentPlayer);
-        currentPlayer = alternatePlayer(currentPlayer);
-        if (someoneWon(board) || boardFull(board)) break;
-      }
-    }
-
-
+    playersChoices(board, playerWins, computerWins, currentPlayer);
     displayBoard(board, playerWins, computerWins);
-
-    let returnVictor = '';
 
     if (someoneWon(board)) {
       returnVictor = `${detectWinner(board)} won!`;
@@ -240,15 +224,23 @@ while (true) {
     } else {
       playerWins += 0;
     }
+
+    if ((playerWins < WINNING_SCORE) && (computerWins < WINNING_SCORE)) {
+      prompt("Are you ready for the next round? (press enter/return to continue)");
+      let nextRound = readline.question();
+      if (nextRound) {
+        continue;
+      }
+    }
   }
 
-  if (playerWins === 5) {
+  if (playerWins === WINNING_SCORE) {
     prompt('You are the overall victor! Congratulations!');
   } else {
     prompt('The computer is the overall victor! Better luck next time!');
   }
 
-  let validResponse = ['y', 'n'];
+
   prompt('Play again? (y or n)');
   let answer = readline.question().toLowerCase();
   while (!validResponse.includes(answer)) {
