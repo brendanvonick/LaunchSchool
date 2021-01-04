@@ -308,29 +308,53 @@ function initializeDeck(newDeck) {
 console.log('*** Welcome to Twenty-One! ***');
 
 // Main Game Loop
+
 while (true) {
+  let playerScore = 0;
+  let dealerScore = 0;
+  let playAgainValue;
 
-  let newDeck = [];
-  let cards = [];
-  let dealersCards = [];
+  while (true) {
 
-  initializeDeck(newDeck);
+    let newDeck = [];
+    let cards = [];
+    let dealersCards = [];
 
-  shuffle(newDeck);
 
-  dealCards(newDeck, cards, dealersCards);
+    initializeDeck(newDeck);
 
-  initialDisplay(cards, dealersCards);
+    shuffle(newDeck);
 
-  hitOrStay(cards, newDeck);
+    dealCards(newDeck, cards, dealersCards);
 
-  logBusted(cards);
+    prompt(`Player: ${playerScore} Dealer: ${dealerScore}`);
+    initialDisplay(cards, dealersCards);
 
-  if (!busted(cards)) {
-    dealersTurn(dealersCards, newDeck);
+    hitOrStay(cards, newDeck);
 
-    results(cards, dealersCards);
+    logBusted(cards);
+
+    if (!busted(cards)) {
+      dealersTurn(dealersCards, newDeck);
+
+      results(cards, dealersCards);
+    }
+
+    if (busted(dealersCards)) {
+      playerScore += 1;
+    } else if (busted(cards)) {
+      dealerScore += 1;
+    } else if (!busted(dealersCards) && total(dealersCards) > total(cards)) {
+      dealerScore += 1;
+    } else if (total(dealersCards) === total(cards)) {
+      continue;
+    } else {
+      playerScore += 1;
+    }
+
+    playAgainValue = playAgain();
+    if (!playAgainValue) break;
   }
-
-  if (!playAgain()) break;
+  prompt(`Final Score - Player: ${playerScore} Dealer: ${dealerScore}`);
+  if (!playAgainValue) break;
 }
