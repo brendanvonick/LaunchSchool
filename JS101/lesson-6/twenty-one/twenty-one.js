@@ -268,6 +268,16 @@ function invalidOption(validOptions, answer) {
   return answer;
 }
 
+function playAgain() {
+  prompt('Would you like to play again (y/n)?');
+  let validOptions = ['y', 'n'];
+  let answer = readline.question().toLowerCase();
+  answer = invalidOption(validOptions, answer);
+  if (answer === 'y') {
+    console.clear();
+  }
+  return answer;
+}
 
 console.log('*** Welcome to Twenty-One! ***');
 
@@ -293,14 +303,5 @@ while (true) {
     results(cards, dealersCards);
   }
 
-  prompt('Would you like to play again (y/n)?');
-  let validOptions = ['y', 'n'];
-  let answer = readline.question().toLowerCase();
-  answer = invalidOption(validOptions, answer);
-  if (answer === 'y') {
-    console.clear();
-    continue;
-  } else {
-    break;
-  }
+  if (playAgain() !== 'y') break;
 }
