@@ -68,8 +68,6 @@ Player Turn:
 */
 
 const readline = require('readline-sync');
-const MAX_VALUE = 21;
-const MIN_DEALER_STAYS = 17;
 
 let deck = [['H', '2'], ['H', '3'], ['H', '4'], ['H', '5'], ['H', '6'], // Hearts
   ['H', '7'], ['H', '8'], ['H', '9'], ['H', '10'], ['H', 'J'],          // Hearts
@@ -89,22 +87,22 @@ function prompt(statement) {
 }
 
 
-function shuffle(newDeck) {
-  for (let index = newDeck.length - 1; index > 0; index--) {
+function shuffle(deck) {
+  for (let index = deck.length - 1; index > 0; index--) {
     let otherIndex = Math.floor(Math.random() * (index + 1)); // 0 to index
-    [newDeck[index], newDeck[otherIndex]] = [newDeck[otherIndex], newDeck[index]]; // swap elements
+    [deck[index], deck[otherIndex]] = [deck[otherIndex], deck[index]]; // swap elements
   }
 }
 
-function dealCards(newDeck, cards, dealersCards) {
-  cards.push(newDeck.shift());
-  dealersCards.push(newDeck.shift());
-  cards.push(newDeck.shift());
-  dealersCards.push(newDeck.shift());
+function dealCards(deck, cards, dealersCards) {
+  cards.push(deck.shift());
+  dealersCards.push(deck.shift());
+  cards.push(deck.shift());
+  dealersCards.push(deck.shift());
 }
 
-function hit(cards, newDeck) {
-  cards.push(newDeck.shift());
+function hit(cards) {
+  cards.push(deck.shift());
 }
 
 // Method to calculate total
@@ -126,17 +124,17 @@ function total(cards) {
 
   // correct for Aces
   values.filter(value => value === "A").forEach(_ => {
-    if (sum > MAX_VALUE) sum -= 10;
+    if (sum > 21) sum -= 10;
   });
 
   return sum;
 }
 
-function busted(cards) {
-  return (total(cards) > MAX_VALUE);
+function busted(playerTotal) {
+  return (playerTotal > 21);
 }
 
-function swapValues(cardValues, cardValuesAndSuits) {
+function swapValues(cardValues) {
   cardValues.forEach((_, index) => {
     if (cardValues[index] === 'J') {
       cardValues[index] = 'Jack';
@@ -148,82 +146,64 @@ function swapValues(cardValues, cardValuesAndSuits) {
       cardValues[index] = 'Ace';
     }
   });
-
-  cardValuesAndSuits.forEach((_, index) =>{
-    if (cardValuesAndSuits[index] === 'S') {
-      cardValuesAndSuits[index] = `${cardValues[index]} (Spades)`;
-    } else if (cardValuesAndSuits[index] === 'C') {
-      cardValuesAndSuits[index] = `${cardValues[index]} (Clubs)`;
-    } else if (cardValuesAndSuits[index] === 'H') {
-      cardValuesAndSuits[index] = `${cardValues[index]} (Hearts)`;
-    } else if (cardValuesAndSuits[index] === 'D') {
-      cardValuesAndSuits[index] = `${cardValues[index]} (Diamonds)`;
-    }
-  });
 }
 
 function displayCards(cards, delimiter = ', a ', joinWords = ', and a ') {
   let cardValues = [];
-  let cardValuesAndSuits = [];
 
   for (let object in cards) {
     cardValues.push(cards[object][1]);
-    cardValuesAndSuits.push(cards[object][0]);
   }
 
-  swapValues(cardValues, cardValuesAndSuits);
+  swapValues(cardValues);
 
-  switch (cardValuesAndSuits.length) {
+  switch (cardValues.length) {
     case 2:
-      return `${cardValuesAndSuits[0]} and a ` +
-             `${cardValuesAndSuits[1]}.`;
+      return `${cardValues[0]} and a ${cardValues[1]}.`;
     case 3:
-      return `${cardValuesAndSuits[0]}${delimiter}` +
-             `${cardValuesAndSuits[1]}${joinWords}` +
-             `${cardValuesAndSuits[2]}.`;
+      return `${cardValues[0]}${delimiter}${cardValues[1]}${joinWords}` +
+             `${cardValues[2]}.`;
     default:
-      return cardValuesAndSuits.slice(0, cardValuesAndSuits.length - 1).join(delimiter) +
-              `${joinWords}${cardValuesAndSuits[cardValuesAndSuits.length - 1]}.`;
+      return cardValues.slice(0, cardValues.length - 1).join(delimiter) +
+              `${joinWords}${cardValues[cardValues.length - 1]}.`;
   }
 }
 
 function displayDealersCards(dealersCards) {
   let cardValues = [];
-  let cardValuesAndSuits = [];
 
   for (let object in dealersCards) {
     cardValues.push(dealersCards[object][1]);
-    cardValuesAndSuits.push(dealersCards[object][0]);
   }
 
-  swapValues(cardValues, cardValuesAndSuits);
+  swapValues(cardValues);
 
-  return `${cardValuesAndSuits[0]} and an unknown card.`;
+  return `${cardValues[0]} and an unknown card.`;
 }
 
 function dealerStays(dealersCards) {
   if  (!busted(dealersCards) &&
-       total(dealersCards) >= MIN_DEALER_STAYS &&
-       total(dealersCards) !== MAX_VALUE) {
+       total(dealersCards) >= 17 &&
+       total(dealersCards) !== 21) {
     prompt('Dealer stays...');
   }
 }
 
-function results(cards, dealersCards) {
-  if (busted(dealersCards)) {
+function results(cards, dealersCards, dealerTotal, playerTotal) {
+  if (busted(dealerTotal)) {
     prompt('Dealer went over 21 and busted.');
     prompt('You Win! Congratulations!');
-  } else if (!busted(dealersCards) && total(dealersCards) > total(cards)) {
+  } else if (!busted(dealerTotal) && dealerTotal > playerTotal) {
     prompt('Dealer wins!');
-  } else if (total(dealersCards) === total(cards)) {
+  } else if (dealerTotal === playerTotal) {
     prompt("It's a tie!");
   } else {
     prompt('You win! Congratulations!');
   }
 }
 
-function logBusted(cards) {
-  if (busted(cards)) {
+function logBusted(playerTotal) {
+  if (busted(playerTotal)) {
     prompt('You went over 21 and busted.');
     prompt('Dealer wins!');
   } else {
@@ -232,24 +212,27 @@ function logBusted(cards) {
   }
 }
 
-function dealerHits(dealersCards, newDeck) {
-  while (total(dealersCards) < MIN_DEALER_STAYS) {
+function dealerHits(dealersCards, dealerTotal) {
+  dealerTotal = total(dealersCards);
+  while (dealerTotal < 17) {
     prompt('Dealer hits...');
-    hit(dealersCards, newDeck);
+    hit(dealersCards);
     prompt(`Dealer has a ${displayCards(dealersCards)}`);
-    prompt(`Dealer's total is ${total(dealersCards)}.`);
+    dealerTotal = total(dealersCards)
+    prompt(`Dealer's total is ${dealerTotal}.`);
 
     dealerStays(dealersCards);
   }
 }
 
-function initialDisplay(cards, dealersCards) {
+function initialDisplay(cards, dealersCards, playerTotal) {
   prompt(`Dealer has a ${displayDealersCards(dealersCards)}`);
   prompt(`You have a ${displayCards(cards)}`);
-  prompt(`Your total is ${total(cards)}.`);
+  playerTotal = total(cards);
+  prompt(`Your total is ${playerTotal}.`);
 }
 
-function hitOrStay(cards, newDeck) {
+function hitOrStay(cards, playerTotal) {
   while (true) {
     prompt('hit or stay?');
     let validOptions = ['hit', 'stay'];
@@ -260,23 +243,25 @@ function hitOrStay(cards, newDeck) {
     }
 
     if (answer === 'hit') {
-      hit(cards, newDeck);
+      hit(cards);
       prompt(`You have a ${displayCards(cards)}`);
-      prompt(`Your total is ${total(cards)}.`);
+      playerTotal = total(cards);
+      prompt(`Your total is ${playerTotal}.`);
     }
 
-    if (answer === 'stay' || busted(cards)) break;
+    if (answer === 'stay' || busted(playerTotal)) break;
   }
 }
 
-function dealersTurn(dealersCards, newDeck) {
+function dealersTurn(dealersCards, dealerTotal) {
   while (true) {
+    dealerTotal = total(dealersCards);
     prompt(`Dealer has a ${displayCards(dealersCards)}`);
-    prompt(`Dealer's total is ${total(dealersCards)}.`);
+    prompt(`Dealer's total is ${dealerTotal}.`);
 
-    dealerHits(dealersCards, newDeck);
-
-    if (total(dealersCards) >= MIN_DEALER_STAYS || busted(dealersCards)) break;
+    dealerHits(dealersCards, dealerTotal);
+    dealerTotal = total(dealersCards);
+    if (dealerTotal >= 17 || busted(dealerTotal)) break;
   }
 }
 
@@ -295,14 +280,8 @@ function playAgain() {
   answer = invalidOption(validOptions, answer);
   if (answer === 'y') {
     console.clear();
-    return answer;
   }
-}
-
-function initializeDeck(newDeck) {
-  deck.forEach(element => {
-    newDeck.push(element);
-  })
+  return answer;
 }
 
 console.log('*** Welcome to Twenty-One! ***');
@@ -310,27 +289,30 @@ console.log('*** Welcome to Twenty-One! ***');
 // Main Game Loop
 while (true) {
 
-  let newDeck = [];
+  shuffle(deck);
+
   let cards = [];
   let dealersCards = [];
+  let playerTotal = 0;
+  let dealerTotal = 0;
+  let playerWins = 0;
+  let dealerWins = 0;
 
-  initializeDeck(newDeck);
+  dealCards(deck, cards, dealersCards);
 
-  shuffle(newDeck);
+  initialDisplay(cards, dealersCards, playerTotal);
 
-  dealCards(newDeck, cards, dealersCards);
+  hitOrStay(cards, playerTotal);
 
-  initialDisplay(cards, dealersCards);
+  playerTotal = total(cards);
 
-  hitOrStay(cards, newDeck);
+  logBusted(playerTotal);
 
-  logBusted(cards);
-
-  if (!busted(cards)) {
-    dealersTurn(dealersCards, newDeck);
-
-    results(cards, dealersCards);
+  if (!busted(playerTotal)) {
+    dealersTurn(dealersCards, dealerTotal);
+    dealerTotal = total(dealersCards);
+    results(cards, dealersCards, dealerTotal, playerTotal);
   }
 
-  if (!playAgain()) break;
+  if (playAgain() !== 'y') break;
 }
