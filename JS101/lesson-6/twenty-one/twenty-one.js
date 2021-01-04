@@ -92,7 +92,8 @@ function prompt(statement) {
 function shuffle(newDeck) {
   for (let index = newDeck.length - 1; index > 0; index--) {
     let otherIndex = Math.floor(Math.random() * (index + 1)); // 0 to index
-    [newDeck[index], newDeck[otherIndex]] = [newDeck[otherIndex], newDeck[index]]; // swap elements
+    [newDeck[index], newDeck[otherIndex]] =
+    [newDeck[otherIndex], newDeck[index]]; // swap elements
   }
 }
 
@@ -293,10 +294,7 @@ function playAgain() {
   let validOptions = ['y', 'n'];
   let answer = readline.question().toLowerCase();
   answer = invalidOption(validOptions, answer);
-  if (answer === 'y') {
-    console.clear();
-    return answer;
-  }
+  if (answer === 'y') return answer;
 }
 
 function initializeDeck(newDeck) {
@@ -320,7 +318,6 @@ while (true) {
     let cards = [];
     let dealersCards = [];
 
-
     initializeDeck(newDeck);
 
     shuffle(newDeck);
@@ -328,6 +325,7 @@ while (true) {
     dealCards(newDeck, cards, dealersCards);
 
     prompt(`Player: ${playerScore} Dealer: ${dealerScore}`);
+    prompt(`<=================>`);
     initialDisplay(cards, dealersCards);
 
     hitOrStay(cards, newDeck);
@@ -346,14 +344,16 @@ while (true) {
       dealerScore += 1;
     } else if (!busted(dealersCards) && total(dealersCards) > total(cards)) {
       dealerScore += 1;
-    } else if (total(dealersCards) === total(cards)) {
-      continue;
-    } else {
+    } else if (!busted(dealersCards) && total(dealersCards) < total(cards)) {
       playerScore += 1;
     }
 
     playAgainValue = playAgain();
-    if (!playAgainValue) break;
+    if (!playAgainValue) {
+      break;
+    } else {
+      console.clear();
+    }
   }
   prompt(`Final Score - Player: ${playerScore} Dealer: ${dealerScore}`);
   if (!playAgainValue) break;
