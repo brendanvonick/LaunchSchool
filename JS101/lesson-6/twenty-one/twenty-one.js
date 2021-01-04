@@ -137,7 +137,7 @@ function busted(cards) {
   return (total(cards) > MAX_VALUE);
 }
 
-function swapValues(cardValues, cardValuesAndSuits) {
+function swapValues(cardValues) {
   cardValues.forEach((_, index) => {
     if (cardValues[index] === 'J') {
       cardValues[index] = 'Jack';
@@ -149,57 +149,59 @@ function swapValues(cardValues, cardValuesAndSuits) {
       cardValues[index] = 'Ace';
     }
   });
+}
 
-  cardValuesAndSuits.forEach((_, index) =>{
-    if (cardValuesAndSuits[index] === 'S') {
-      cardValuesAndSuits[index] = `${cardValues[index]} (Spades)`;
-    } else if (cardValuesAndSuits[index] === 'C') {
-      cardValuesAndSuits[index] = `${cardValues[index]} (Clubs)`;
-    } else if (cardValuesAndSuits[index] === 'H') {
-      cardValuesAndSuits[index] = `${cardValues[index]} (Hearts)`;
-    } else if (cardValuesAndSuits[index] === 'D') {
-      cardValuesAndSuits[index] = `${cardValues[index]} (Diamonds)`;
+function swapValSuits(cardValues, cardValSuits) {
+  cardValSuits.forEach((_, index) => {
+    if (cardValSuits[index] === 'S') {
+      cardValSuits[index] = `${cardValues[index]} (Spades)`;
+    } else if (cardValSuits[index] === 'C') {
+      cardValSuits[index] = `${cardValues[index]} (Clubs)`;
+    } else if (cardValSuits[index] === 'H') {
+      cardValSuits[index] = `${cardValues[index]} (Hearts)`;
+    } else if (cardValSuits[index] === 'D') {
+      cardValSuits[index] = `${cardValues[index]} (Diamonds)`;
     }
   });
 }
 
 function displayCards(cards, delimiter = ', a ', joinWords = ', and a ') {
   let cardValues = [];
-  let cardValuesAndSuits = [];
+  let cardValSuits = [];
 
   for (let object in cards) {
     cardValues.push(cards[object][1]);
-    cardValuesAndSuits.push(cards[object][0]);
+    cardValSuits.push(cards[object][0]);
   }
 
-  swapValues(cardValues, cardValuesAndSuits);
+  swapValues(cardValues);
+  swapValSuits(cardValues, cardValSuits);
 
-  switch (cardValuesAndSuits.length) {
+  switch (cardValSuits.length) {
     case 2:
-      return `${cardValuesAndSuits[0]} and a ` +
-             `${cardValuesAndSuits[1]}.`;
+      return `${cardValSuits[0]} and a ${cardValSuits[1]}.`;
     case 3:
-      return `${cardValuesAndSuits[0]}${delimiter}` +
-             `${cardValuesAndSuits[1]}${joinWords}` +
-             `${cardValuesAndSuits[2]}.`;
+      return `${cardValSuits[0]}${delimiter}` +
+             `${cardValSuits[1]}${joinWords}${cardValSuits[2]}.`;
     default:
-      return cardValuesAndSuits.slice(0, cardValuesAndSuits.length - 1).join(delimiter) +
-              `${joinWords}${cardValuesAndSuits[cardValuesAndSuits.length - 1]}.`;
+      return cardValSuits.slice(0, cardValSuits.length - 1).join(delimiter) +
+              `${joinWords}${cardValSuits[cardValSuits.length - 1]}.`;
   }
 }
 
 function displayDealersCards(dealersCards) {
   let cardValues = [];
-  let cardValuesAndSuits = [];
+  let cardValSuits = [];
 
   for (let object in dealersCards) {
     cardValues.push(dealersCards[object][1]);
-    cardValuesAndSuits.push(dealersCards[object][0]);
+    cardValSuits.push(dealersCards[object][0]);
   }
 
-  swapValues(cardValues, cardValuesAndSuits);
+  swapValues(cardValues);
+  swapValSuits(cardValues, cardValSuits);
 
-  return `${cardValuesAndSuits[0]} and an unknown card.`;
+  return `${cardValSuits[0]} and an unknown card.`;
 }
 
 function dealerStays(dealersCards) {
@@ -294,13 +296,13 @@ function playAgain() {
   let validOptions = ['y', 'n'];
   let answer = readline.question().toLowerCase();
   answer = invalidOption(validOptions, answer);
-  if (answer === 'y') return answer;
+  return answer === 'y';
 }
 
 function initializeDeck(newDeck) {
   deck.forEach(element => {
     newDeck.push(element);
-  })
+  });
 }
 
 console.log('*** Welcome to Twenty-One! ***');
