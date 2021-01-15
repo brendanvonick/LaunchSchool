@@ -71,24 +71,35 @@ const readline = require('readline-sync');
 const MAX_VALUE = 21;
 const MIN_DEALER_STAYS = MAX_VALUE - 4;
 const WINNING_SCORE = 5;
+const SUITS = ['H', 'D', 'C', 'S'];
+const FACE_CARDS = ['J', 'Q', 'K', 'A'];
+const DECK = deckCreation();
 
-let deck = [['H', '2'], ['H', '3'], ['H', '4'], ['H', '5'], ['H', '6'], // Hearts
-  ['H', '7'], ['H', '8'], ['H', '9'], ['H', '10'], ['H', 'J'],          // Hearts
-  ['H', 'Q'], ['H', 'K'], ['H', 'A'],                                   // Hearts
-  ['D', '2'], ['D', '3'], ['D', '4'], ['D', '5'], ['D', '6'],           // Diamonds
-  ['D', '7'], ['D', '8'], ['D', '9'], ['D', '10'], ['D', 'J'],          // Diamonds
-  ['D', 'Q'], ['D', 'K'], ['D', 'A'],                                   // Diamonds
-  ['C', '2'], ['C', '3'], ['C', '4'], ['C', '5'], ['C', '6'],           // Clubs
-  ['C', '7'], ['C', '8'], ['C', '9'], ['C', '10'], ['C', 'J'],          // Clubs
-  ['C', 'Q'], ['C', 'K'], ['C', 'A'],                                   // Clubs
-  ['S', '2'], ['S', '3'], ['S', '4'], ['S', '5'], ['S', '6'],           // Spades
-  ['S', '7'], ['S', '8'], ['S', '9'], ['S', '10'], ['S', 'J'],          // Spades
-  ['S', 'Q'], ['S', 'K'], ['S', 'A']];                                  // Spades
+
+function deckCreation() {
+  let deck = [];
+  SUITS.forEach(suit => {
+    for (let value = 2; value <= 10; value += 1) {
+      let subArr = [];
+      subArr[0] = suit;
+      subArr[1] = String(value);
+      deck.push(subArr);
+    }
+
+    FACE_CARDS.forEach(face => {
+      let subArr = [];
+      subArr[0] = suit;
+      subArr[1] = face;
+      deck.push(subArr);
+    });
+  });
+
+  return deck;
+}
 
 function prompt(statement) {
   console.log(`==> ${statement}`);
 }
-
 
 function shuffle(newDeck) {
   for (let index = newDeck.length - 1; index > 0; index--) {
@@ -99,10 +110,8 @@ function shuffle(newDeck) {
 }
 
 function dealCards(newDeck, cards, dealersCards) {
-  cards.push(newDeck.shift());
-  dealersCards.push(newDeck.shift());
-  cards.push(newDeck.shift());
-  dealersCards.push(newDeck.shift());
+  cards.push(newDeck.shift(), newDeck.shift());
+  dealersCards.push(newDeck.shift(), newDeck.shift());
 }
 
 function hit(cards, newDeck) {
@@ -253,7 +262,7 @@ function hitOrStay(cards, newDeck, playerTotal) {
   while (true) {
     let answer = hitOrStayPrompt();
 
-    if (answer === 'hit') {
+    if (['h', 'hit'].includes(answer)) {
       hit(cards, newDeck);
       prompt(`You have a ${displayCards(cards)}`);
       playerTotal = total(cards);
@@ -262,8 +271,8 @@ function hitOrStay(cards, newDeck, playerTotal) {
 
     if (busted(playerTotal)) {
       break;
-    } else if (answer === 'stay') {
-      prompt('You chose to stay!\n...');  // if player didn't bust, must have stayed to get here
+    } else if (['s', 'stay'].includes(answer)) {
+      prompt('You chose to stay!\n...');
       break;
     }
   }
@@ -290,11 +299,11 @@ function invalidOption(validOptions, answer) {
 }
 
 function hitOrStayPrompt() {
-  prompt('hit or stay?');
-  let validOptions = ['hit', 'stay'];
+  prompt('hit (h) or stay (s)?');
+  let validOptions = ['h', 's', 'hit', 'stay'];
   let answer = readline.question().toLowerCase();
   while (!validOptions.includes(answer)) {
-    prompt(`That is not a valid option, hit or stay? (hit/stay)`);
+    prompt(`That is not a valid option, hit or stay? (h/s)`);
     answer = readline.question().toLowerCase();
   }
   return answer;
@@ -327,24 +336,30 @@ function nextRound() {
 }
 
 function initializeDeck(newDeck) {
-  deck.forEach(element => {
+  DECK.forEach(element => {
     newDeck.push(element);
   });
 }
-
-// function quit() {
-//   prompt('Would you like to quit (y/n)?');
-//   let validOptions = ['y', 'n'];
-//   let answer = readline.question().toLowerCase();
-//   answer = invalidOption(validOptions, answer);
-//   return answer === 'y';
-// }
 
 function intro() {
   console.clear();
   console.log('*** Welcome to Twenty-One! ***');
   console.log('You are playing against the dealer (computer), first to 5 wins!');
   console.log('');
+}
+
+function whoWonRound(dealerTotal, playerTotal) {
+  if (busted(dealerTotal)) {
+    return 'player';
+  } else if (busted(playerTotal)) {
+    return 'dealer';
+  } else if (!busted(dealerTotal) && dealerTotal > playerTotal) {
+    return 'dealer';
+  } else if (!busted(dealerTotal) && dealerTotal < playerTotal) {
+    return 'player';
+  } else {
+    return undefined;
+  }
 }
 
 intro();
@@ -386,22 +401,12 @@ while (true) {
       results(dealerTotal, playerTotal);
     }
 
-    if (busted(dealerTotal)) {
+    if (whoWonRound(dealerTotal, playerTotal) === 'player') {
       playerScore += 1;
-    } else if (busted(playerTotal)) {
+    } else if (whoWonRound(dealerTotal, playerTotal) === 'dealer') {
       dealerScore += 1;
-    } else if (!busted(dealerTotal) && dealerTotal > playerTotal) {
-      dealerScore += 1;
-    } else if (!busted(dealersCards) && dealerTotal < playerTotal) {
-      playerScore += 1;
     }
 
-    // playAgainValue = playAgain();
-    // if (!playAgainValue) {
-    //   break;
-    // } else {
-    //   console.clear();
-    // }
 
     if (playerScore < WINNING_SCORE && dealerScore < WINNING_SCORE) {
       let nextRoundValue = nextRound();
@@ -413,7 +418,7 @@ while (true) {
     }
 
 
-    if (playerScore === 5 || dealerScore === 5) break;
+    if (playerScore === WINNING_SCORE || dealerScore === WINNING_SCORE) break;
 
   }
   console.log('');
