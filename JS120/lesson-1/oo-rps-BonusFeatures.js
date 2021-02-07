@@ -212,15 +212,36 @@ const RPSGame = {
                 `computer: ${this.computer.score}`);
   },
 
+  playAgain() {
+    console.log('Would you like to play again? (y/n)');
+    let answer = readline.question();
+    return answer.toLowerCase()[0] === 'y';
+  },
+
+  resetGame() {
+    this.human.score = 0;
+    this.computer.score = 0;
+    this.human.moveHistory = [];
+    this.computer.moveHistory = [];
+    console.clear();
+  },
+
   play() {
-    this.displayWelcomeMessage();
-    console.log('-'.repeat(32));
-    while (this.human.score < 5 && this.computer.score < 5) {
-      this.human.choose();
-      this.computer.choose();
-      this.displayWinner();
-      this.displayScore();
+    while (true) {
+      this.displayWelcomeMessage();
       console.log('-'.repeat(32));
+      while (this.human.score < 5 && this.computer.score < 5) {
+        this.human.choose();
+        this.computer.choose();
+        this.displayWinner();
+        this.displayScore();
+        console.log('-'.repeat(32));
+      }
+      if (this.playAgain()) {
+        this.resetGame();
+      } else {
+        break;
+      }
     }
 
     this.displayGoodbyeMessage();
