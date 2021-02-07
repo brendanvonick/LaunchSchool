@@ -92,6 +92,8 @@ function createChoices(moveHistory) {
 function createPlayer() {
   return {
     move: null,
+    score: 0,
+    moveHistory: [],
   };
 }
 
@@ -106,9 +108,6 @@ function createComputer() {
       let randomIndex = Math.floor(Math.random() * choices.length);
       this.move = choices[randomIndex];
     },
-    score: 0,
-
-    moveHistory: [],
   };
 
   return Object.assign(playerObject, computerObject);
@@ -132,9 +131,6 @@ function createHuman() {
 
       this.move = choice;
     },
-    score: 0,
-
-    moveHistory: [],
   };
 
   return Object.assign(playerObject, humanObject);
@@ -230,6 +226,7 @@ const RPSGame = {
     while (true) {
       this.displayWelcomeMessage();
       console.log('-'.repeat(32));
+
       while (this.human.score < 5 && this.computer.score < 5) {
         this.human.choose();
         this.computer.choose();
@@ -237,6 +234,7 @@ const RPSGame = {
         this.displayScore();
         console.log('-'.repeat(32));
       }
+
       if (this.playAgain()) {
         this.resetGame();
       } else {
