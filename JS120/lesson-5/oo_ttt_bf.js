@@ -158,11 +158,13 @@ class TTTGame {
   play() {
     this.displayWelcomeMessage();
 
-    do {
+    while (true) {
       this.playOnce();
-      if (this.matchNotOver()) this.nextRound();
+      if (!this.matchNotOver()) break;
+      this.nextRound();
       this.firstPlayer = this.togglePlayer(this.firstPlayer);
-    } while (this.matchNotOver());
+    }
+
     this.displayGoodbyeMessage();
   }
 
@@ -184,7 +186,7 @@ class TTTGame {
   }
 
   nextRound() {
-    let prompt = 'Are you ready for the next round (y)? ';
+    let prompt = "Enter 'y' to proceed to the next round. ";
     let choice = readline.question(prompt).toLowerCase();
     let validChoices = ['y'];
 
@@ -193,10 +195,7 @@ class TTTGame {
       choice = readline.question(prompt).toLowerCase();
     }
 
-    if (choice === 'y') {
-      this.resetBoard();
-    }
-    return choice === 'y';
+    this.resetBoard();
   }
 
   togglePlayer(player) {
@@ -298,7 +297,11 @@ class TTTGame {
 
   pickCenterSquare() {
     let centerSquare = '5';
-    if (this.board.isUnusedSquare(centerSquare)) return centerSquare;
+    if (this.board.isUnusedSquare(centerSquare)) {
+      return centerSquare;
+    } else {
+      return null;
+    }
   }
 
   defensiveComputerMove() {
