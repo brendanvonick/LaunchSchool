@@ -11,7 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "fraction.js": "github:infusion/Fraction.js",
-    "readline-sync": "^1.4.10"
+    "readline-sync": "^1.4.10",
+    "shuffle-array": "^1.0.1"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
