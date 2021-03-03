@@ -22,6 +22,16 @@ const shuffle = require('shuffle-array');
 class Deck {
   static SUITS = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
   static FACE_CARDS = ['Jack', 'Queen', 'King', 'Ace'];
+  static FACE_VALUE = 10;
+  static CALC_ACE_VAL = function(total) {
+      let totalTest = total;
+      if (totalTest + 11 <= 21) {
+        return 11;
+      } else {
+        return 1;
+      }
+    }
+
   constructor() {
     this.deck = [];
     Deck.SUITS.forEach(suit => {
@@ -82,14 +92,9 @@ class Participant {
       if (!Deck.FACE_CARDS.includes(card.value)) {
         total += card.value;
       } else if (['Jack', 'Queen', 'King'].includes(card.value)) {
-        total += 10;
+        total += Deck.FACE_VALUE;
       } else if (card.value === 'Ace') {
-        let totalTest = total;
-        if (totalTest + 11 <= 21) {
-          total += 11;
-        } else {
-          total += 1;
-        }
+        total += Deck.CALC_ACE_VAL.call(this, total);
       }
     });
 
@@ -131,6 +136,7 @@ class Dealer extends Participant {
 }
 
 class TwentyOneGame {
+  static WINNING_AMOUNT = 10;
   constructor() {
     this.player = new Player();
     this.dealer = new Dealer();
@@ -146,7 +152,8 @@ class TwentyOneGame {
       this.dealerTurn();
       this.moneyExchange();
       this.displayResult();
-      if (this.player.money === 10 || this.dealer.money === 10) {
+      if (this.player.money === TwentyOneGame.WINNING_AMOUNT ||
+          this.dealer.money === TwentyOneGame.WINNING_AMOUNT) {
         break;
       }
       this.promptNextRound();
@@ -188,7 +195,7 @@ class TwentyOneGame {
   playerTurn() {
     let choice;
     do {
-      choice = readline.question('... Would you like to hit' +
+      choice = readline.question('... Would you like to hit ' +
                                  'or stay (hit/stay)? ');
       let validChoices = ['hit', 'stay'];
       while (!validChoices.includes(choice.toLowerCase())) {
@@ -306,10 +313,11 @@ class TwentyOneGame {
   }
 
   promptNextRound() {
-    let choice = readline.question('Are you ready for the next round (y)? ');
+    let choice = readline.question("Enter 'y' when you're ready for the next " +
+                                   "round. ");
     while (choice.toLowerCase() !== 'y') {
-      choice = readline.question('Invalid option... are you ready for the ' +
-                                 'next round (y)? ');
+      choice = readline.question("Invalid option... enter 'y' when you're " +
+                                 "ready for the next round. ");
     }
   }
 
