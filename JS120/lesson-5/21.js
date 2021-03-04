@@ -57,7 +57,7 @@ class Deck {
   }
 
   hit() {
-    return this.deck.pop(this.deck.length - 1, 1);
+    return this.deck.pop(this.deck.length - 1);
   }
 }
 
