@@ -20,17 +20,18 @@ const readline = require('readline-sync');
 const shuffle = require('shuffle-array');
 
 class Deck {
+  static MAX_CARD_TOTAL = 21;
   static SUITS = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
   static FACE_CARDS = ['Jack', 'Queen', 'King', 'Ace'];
   static FACE_VALUE = 10;
   static CALC_ACE_VAL = function(total) {
-      let totalTest = total;
-      if (totalTest + 11 <= 21) {
-        return 11;
-      } else {
-        return 1;
-      }
+    let totalTest = total;
+    if (totalTest + 11 <= Deck.MAX_CARD_TOTAL) {
+      return 11;
+    } else {
+      return 1;
     }
+  }
 
   constructor() {
     this.deck = [];
@@ -102,7 +103,7 @@ class Participant {
   }
 
   isBusted() {
-    return this.total() > 21;
+    return this.total() > Deck.MAX_CARD_TOTAL;
   }
 }
 
@@ -124,6 +125,7 @@ class Dealer extends Participant {
 
   constructor() {
     super();
+    this.dealerStaysTotal = 17;
   }
 
   displayTotal() {
@@ -152,8 +154,7 @@ class TwentyOneGame {
       this.dealerTurn();
       this.moneyExchange();
       this.displayResult();
-      if (this.player.money === TwentyOneGame.WINNING_AMOUNT ||
-          this.dealer.money === TwentyOneGame.WINNING_AMOUNT) {
+      if (this.playerWonMatch()) {
         break;
       }
       this.promptNextRound();
@@ -162,6 +163,11 @@ class TwentyOneGame {
 
     this.displayFinalResult();
     this.displayGoodbyeMessage();
+  }
+
+  playerWonMatch() {
+    return this.player.money === TwentyOneGame.WINNING_AMOUNT ||
+           this.dealer.money === TwentyOneGame.WINNING_AMOUNT;
   }
 
   dealCards() {
@@ -196,11 +202,13 @@ class TwentyOneGame {
     let choice;
     do {
       choice = readline.question('... Would you like to hit ' +
-                                 'or stay (hit/stay)? ');
+                                 'or stay (hit/stay)? ').toLowerCase();
       let validChoices = ['hit', 'stay'];
-      while (!validChoices.includes(choice.toLowerCase())) {
-        choice = readline.question('Invalid option, hit or stay (hit/stay)');
+      while (!validChoices.includes(choice)) {
+        choice = readline.question('Invalid option, hit or stay (hit/stay): ')
+          .toLowerCase();
       }
+
       if (choice === 'hit') {
         this.hit(this.player.hand);
         console.log(`You have a ${this.showCards(this.player.hand)}`);
@@ -218,7 +226,7 @@ class TwentyOneGame {
       console.log(`The dealer has a ${this.showCards(this.dealer.hand)}`);
       console.log(`The dealer's total is ${this.dealer.total()}`);
 
-      while (this.dealer.total() < 17) {
+      while (this.dealer.total() < this.dealer.dealerStaysTotal) {
         console.log('The dealer hits.');
         this.hit(this.dealer.hand);
         console.log(`The dealer has a ${this.showCards(this.dealer.hand)}`);
@@ -269,7 +277,7 @@ class TwentyOneGame {
   displayFinalResult() {
     console.log('');
     console.log('');
-    if (this.player.money === 10) {
+    if (this.player.money === TwentyOneGame.WINNING_AMOUNT) {
       console.log('Your pockets are full with $10.00! You won the match!');
       console.log('Congratulations');
     } else {
